@@ -43,7 +43,7 @@ app.get("/get", (req, res) => {
   ref.once("value", (snapshot) => {
     const data = snapshot.val();
     if (!data) {
-      return res.status(404).json({ error: "No data found for the specified key!" });
+      return res.status(404).json({ reply: "এইটা আমাকে শিখানো হয়নি গো🥺" });
     }
 
     // র‌্যান্ডম ডেটা রিটার্ন
