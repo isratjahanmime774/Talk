@@ -5,7 +5,7 @@ const bodyParser = require("body-parser");
 // Firebase Service Account Key ফাইল ইম্পোর্ট করো
 const serviceAccount = require("./serviceAccountKey.json");
 
-// Firebase অ্যাডমিন SDK ইনিশিয়ালাইজ করো
+// Firebase অ্যাডমিন SDK ইনিশিয়ালাইজ করো
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   databaseURL: "https://talk1-5b07d-default-rtdb.firebaseio.com/",
@@ -33,26 +33,58 @@ app.post("/save", (req, res) => {
 });
 
 // GET রুট: র‌্যান্ডম ডেটা রিটার্ন করা
-app.get("/get", (req, res) => {
+app.get("/get", async (req, res) => {
   const { key } = req.query;
   if (!key) {
     return res.status(400).json({ error: "Key is required!" });
   }
 
-  const ref = db.ref(key);
-  ref.once("value", (snapshot) => {
-    const data = snapshot.val();
-    if (!data) {
-      return res.status(404).json({ error: "No data found for the specified key!" });
-    }
+  const findKeyData = async (searchKey) => {
+    const ref = db.ref(searchKey);
+    const snapshot = await ref.once("value");
+    return snapshot.val();
+  };
 
-    // র‌্যান্ডম ডেটা রিটার্ন
+  let data;
+
+  // ১. সরাসরি key মিলানো
+  data = await findKeyData(key);
+  if (data) {
     const values = Object.values(data);
     const reply = values[Math.floor(Math.random() * values.length)];
+    return res.status(200).json({ reply });
+  }
 
-    // JSON রেসপন্স হিসেবে পাঠানো
-    res.status(200).json({ reply });
-  });
+  // ২. ডেটাবেসে সমস্ত key খুঁজে বের করা
+  const allKeysSnapshot = await db.ref().once("value");
+  const allKeys = Object.keys(allKeysSnapshot.val() || {});
+
+  // ৩. প্রথম ৩ অক্ষর মিলানো
+  const partialKeyStart = key.slice(0, 3);
+  const startMatchKey = allKeys.find((dbKey) => dbKey.startsWith(partialKeyStart));
+  if (startMatchKey) {
+    data = await findKeyData(startMatchKey);
+    if (data) {
+      const values = Object.values(data);
+      const reply = values[Math.floor(Math.random() * values.length)];
+      return res.status(200).json({ reply });
+    }
+  }
+
+  // ৪. শেষ ৩ অক্ষর মিলানো
+  const partialKeyEnd = key.slice(-3);
+  const endMatchKey = allKeys.find((dbKey) => dbKey.endsWith(partialKeyEnd));
+  if (endMatchKey) {
+    data = await findKeyData(endMatchKey);
+    if (data) {
+      const values = Object.values(data);
+      const reply = values[Math.floor(Math.random() * values.length)];
+      return res.status(200).json({ reply });
+    }
+  }
+
+  // ৫. কিছুই না মিললে ত্রুটি
+  return res.status(404).json({ error: "No data found for the specified key or similar keys!" });
 });
 
 // সার্ভার শুরু করা
