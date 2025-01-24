@@ -8,7 +8,7 @@ const serviceAccount = require("./serviceAccountKey.json");
 // Firebase অ্যাডমিন SDK ইনিশিয়ালাইজ করো
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://talk1-5b07d-default-rtdb.firebaseio.com/",
+  databaseURL: "https://talk2-af13b-default-rtdb.firebaseio.com/",
 });
 
 const db = admin.database(); // ডাটাবেস রেফারেন্স
