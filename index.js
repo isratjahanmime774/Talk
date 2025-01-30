@@ -1,13 +1,14 @@
 const express = require("express");
 const admin = require("firebase-admin");
 const bodyParser = require("body-parser");
+
 // Firebase Service Account Key ফাইল ইম্পোর্ট করো
-const serviceAccount = require("./serviceAccountKey.json");
+const serviceAccount = require("./333.json");
 
 // Firebase অ্যাডমিন SDK ইনিশিয়ালাইজ করো
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://talk4-a1f82-default-rtdb.firebaseio.com/",
+  databaseURL: "https://talk1-df729-default-rtdb.firebaseio.com/",
 });
 
 const db = admin.database(); // ডাটাবেস রেফারেন্স
